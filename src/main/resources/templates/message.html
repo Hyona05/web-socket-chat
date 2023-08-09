@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h2 id="typing"></h2>
+<textarea cols="10" style="width: 300px" onkeypress="sendTypingMessage()" onkeyup="stopTyping()">
+
+</textarea>
+</body>
+</html>
+
+<script src="/webjars/sockjs-client/sockjs.min.js"></script>
+<script src="/webjars/stomp-websocket/stomp.min.js"></script>
+
+<script>
+  var socket = new SockJS("/websocket-connection");
+  stompClient = Stomp.over(socket);
+  stompClient.connect({}, function (frame){
+    stompClient.subscribe("/topic/typing",function (payload) {
+      document.getElementById("typing").innerText =  payload.body
+    })
+    stompClient.subscribe("/topic/online",function (payload) {
+     setTimeout(function () {
+       document.getElementById("typing").innerText =  payload.body
+     }, 1000)
+    })
+  })
+  function sendTypingMessage() {
+    stompClient.send("/app/typing", null,{})
+  }
+  function stopTyping(){
+    stompClient.send("/app/online", null, {})
+  }
+</script>
